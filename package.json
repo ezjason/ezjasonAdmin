@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A Vue.js project",
   "author": "ezjason <2543347208@qq.com>",
-  "homepage": "https://ezjason.github.io/github-actions-demo",
+  "homepage": "https://ezjason.github.io/github-action-demo",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",

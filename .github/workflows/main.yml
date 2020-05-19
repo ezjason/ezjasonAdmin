@@ -17,7 +17,7 @@ jobs:
         npm run build
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@master
-      env:
+      with:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         BRANCH: gh-pages
         FOLDER: dist

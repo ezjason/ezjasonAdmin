@@ -1,6 +1,8 @@
 <template>
     <div class="password">
-      修改密码
+      <el-card class="box-card">
+
+      </el-card>
     </div>
 </template>
 

@@ -4,6 +4,8 @@
 
 ## Build Setup
 
+##基于vue+elementUI 的webpack3.0+后台管理系统，持续优化中。。。
+
 ``` bash
 # install dependencies
 npm install

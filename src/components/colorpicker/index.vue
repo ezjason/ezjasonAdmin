@@ -11,14 +11,19 @@
     },
     props: {},
     computed: {
-      color () {
-        return this.$store.state.base.color
+      color :{
+        get(){
+          return this.$store.state.base.color
+        },
+        set(val){
+          this.$store.state.base.color = val
+        }
+
       }
     },
     methods: {
       change (val) {
         this.$store.commit('changeColor', val)
-        // this.$emit('update:color', val)
       }
     }
   }

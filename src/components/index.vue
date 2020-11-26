@@ -1,54 +1,65 @@
 <template>
   <div class="index">
     <el-container>
-      <el-header :style="{ 'background-color': color }" style="display: flex;justify-content: space-between;align-items: center;">
+      <el-header :style="{ 'background-color': color }"
+                 style="display: flex;justify-content: space-between;align-items: center;">
         <div class="icon-header">
-          <span style="color: #fff;font-size: 30px;font-weight: 800;">ezjason</span>
-          <el-button icon="el-icon-s-operation"  type="text" @click="isCollapse=!isCollapse;" style="float: left;"></el-button>
+          <span style="color: #fff;font-size: 30px;font-weight: 800;">{{$store.state.base.name}}</span>
+          <el-button icon="el-icon-s-operation" type="text" @click="isCollapse=!isCollapse;"
+                     style="float: left;"></el-button>
         </div>
         <div class="icon-header-right">
           <v-color></v-color>
+          <el-image
+            style="width: 40px; height: 33px;"
+            :src="url" :fit="'fill'"
+            :preview-src-list="srcList"></el-image>
+          <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" :background-color="color"
+                   text-color="#fff" active-text-color="#fff" @select="handleSelect">
+            <el-submenu index="1">
+              <template slot="title"> {{$store.state.base.name}}</template>
+              <el-menu-item index="1">个人资料</el-menu-item>
+              <el-menu-item index="2">修改密码</el-menu-item>
+              <el-menu-item index="3">退出登录</el-menu-item>
+            </el-submenu>
+          </el-menu>
         </div>
       </el-header>
       <el-container>
         <el-aside :class="isCollapse?'hide-side':'show-side'">
-          <el-menu default-active="1-4-1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose"
-                   :collapse="isCollapse">
-            <el-submenu index="1">
+          <el-menu :default-active="`${menu[0].children?'0-0':'0'}`" class="el-menu-vertical-demo" @open="handleOpen"
+                   @close="handleClose"
+                   :collapse="isCollapse" unique-opened>
+            <el-submenu
+              v-for="(item,key) in menu" :index="key.toString()" v-if="item.children">
               <template slot="title">
-                <i class="el-icon-location"></i>
-                <span slot="title">导航一</span>
+                <i :class="item.icon"></i>
+                <span slot="title">{{item.label}}</span>
               </template>
               <el-menu-item-group>
-                <span slot="title">分组一</span>
-                <el-menu-item index="1-1">选项1</el-menu-item>
-                <el-menu-item index="1-2">选项2</el-menu-item>
+                <el-menu-item :index="`${key.toString()}-${ind}`" v-for="(i,ind) in item.children" @click="link(i)">
+                  {{i.label}}
+                </el-menu-item>
               </el-menu-item-group>
-              <el-menu-item-group title="分组2">
-                <el-menu-item index="1-3">选项3</el-menu-item>
-              </el-menu-item-group>
-              <el-submenu index="1-4">
-                <span slot="title">选项4</span>
-                <el-menu-item index="1-4-1">选项1</el-menu-item>
-              </el-submenu>
             </el-submenu>
-            <el-menu-item index="2">
-              <i class="el-icon-menu"></i>
-              <span slot="title">导航二</span>
-            </el-menu-item>
-            <el-menu-item index="3" >
-              <i class="el-icon-document"></i>
-              <span slot="title">导航三</span>
-            </el-menu-item>
-            <el-menu-item index="4">
+            <el-menu-item v-for="(item,key) in menu.filter(i=>!i.children)" :index="key.toString()" @click="link(item)"
+                          v-else>
               <i class="el-icon-setting"></i>
-              <span slot="title">导航四</span>
+              <span slot="title">{{item.label}}</span>
             </el-menu-item>
           </el-menu>
         </el-aside>
         <el-container>
-          <el-main>Main</el-main>
-          <el-footer :style="{ 'background-color': color }">Footer</el-footer>
+          <el-main>
+            <div class="breadcrumb">
+              <el-breadcrumb separator="/">
+                <el-breadcrumb-item v-for="(i,index) in breadcrumb"><router-link :to="i.href">{{i.name}}</router-link>
+                </el-breadcrumb-item>
+              </el-breadcrumb>
+            </div>
+            <router-view></router-view>
+          </el-main>
+          <el-footer :style="{ 'background-color': color }">{{$store.state.base.name}}</el-footer>
         </el-container>
       </el-container>
     </el-container>
@@ -70,21 +81,28 @@
         state: 'bind',
         isCollapse: false,
         width: 200,
-        menu:[{
-          label:"导航一"
-        },{
-          label:"导航二"
-        },{
-          label:"导航三"
-        },{
-          label:"导航四"
-        }]
+        activeIndex: null
       }
     },
-    computed:{
-      color(){
+    computed: {
+      color () {
         return this.$store.state.base.color
+      },
+      url () {
+        return this.$store.state.base.imageURL
+      },
+      srcList () {
+        return this.$store.state.base.srcList
+      },
+      menu () {
+        return this.$store.state.base.menu
+      },
+      breadcrumb () {
+        return this.$store.state.base.breadcrumb
       }
+    },
+    mounted () {
+      this.update(this.menu[0])
     },
     methods: {
       handleOpen (key, keyPath) {
@@ -92,6 +110,108 @@
       },
       handleClose (key, keyPath) {
         console.log(key, keyPath)
+      },
+      handleSelect (val) {
+        switch (val * 1) {
+          case 1:
+            // 个人资料
+            console.log('个人资料')
+            this.$router.push({
+              path: '/setting'
+            })
+            this.$store.commit('changeBreadcrumb', [{
+              name: '个人资料',
+              href: '/setting'
+            }])
+            break
+          case 2:
+            // 修改密码
+            console.log('密码')
+            this.$router.push({
+              path: '/password'
+            })
+            this.$store.commit('changeBreadcrumb', [{
+              name: '修改密码',
+              href: '/password'
+            }])
+            break
+          case 3:
+            // 登出
+            console.log('登出')
+            this.loginOut()
+            break
+          default:
+            console.log('默认')
+        }
+      },
+      link (item) {
+        if (item.parentId === -1 && item.href) {
+          let indexObj = {
+            name: item.label,
+            href: item.href ? item.href : '/'
+          }
+          this.$store.commit('changeBreadcrumb', [indexObj])
+        } else {
+          let data = this.menu.filter(i => i.id === item.parentId)[0]
+          let arr = []
+          let obj = {
+            name: data.label,
+            href: data.href ? item.href : '/'
+          }
+          arr.push(obj)
+          arr.push({
+            name: item.label,
+            href: item.href ? item.href : '/'
+          })
+          this.$store.commit('changeBreadcrumb', arr)
+        }
+        this.$router.push({
+          path: item.href
+        })
+        console.log(this.$route)
+      },
+      update (item, obj = {}) {
+        // 初始化菜单
+        if (item.children) {
+          let newObj = {
+            name: item.label,
+            href: item.href ? item.href : '/'
+          }
+          this.update(item.children[0], newObj)
+        } else {
+          if (obj) {
+            let arr = []
+            arr.push(obj)
+            arr.push({
+              name: item.label,
+              href: item.href ? item.href : '/'
+            })
+            console.log(arr)
+            this.$store.commit('changeBreadcrumb', arr)
+          } else {
+            let indexObj = {
+              name: item.label,
+              href: item.href ? item.href : '/'
+            }
+            this.$store.commit('changeBreadcrumb', [indexObj])
+          }
+          this.$router.push({
+            path: item.href
+          })
+        }
+
+      },
+  // 登出
+      loginOut(){
+        this.$alert('确定退出登录？', '提示', {
+          confirmButtonText: '确定',
+          callback: action => {
+            this.$message({
+              type: 'info',
+              message: `action: ${ action }`
+            });
+          }
+        });
       }
     },
     components: {
@@ -120,7 +240,7 @@
     background-color: #E9EEF3;
     color: #333;
     text-align: center;
-    line-height: 160px;
+    /*line-height: 160px;*/
   }
 
   body > .el-container {
@@ -148,19 +268,32 @@
     justify-content: space-between;
     align-items: center;
   }
-  .icon-header-right{
-    width:200px;
+
+  .icon-header-right {
+    width: 200px;
     height: 60px;
     display: flex;
     justify-content: right;
     align-items: center;
   }
-  .hide-side{
-    width:65px !important;
+
+  .hide-side {
+    width: 65px !important;
     transition: width .5s;
   }
-  .show-side{
-    width:200px !important;
-    transition: width .1s;
+
+  .show-side {
+    width: 200px !important;
+    transition: width .5s;
+  }
+
+  .el-image {
+    border-radius: 50%;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .breadcrumb {
+    padding: 0 0 10px 0;
   }
 </style>
